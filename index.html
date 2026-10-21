@@ -1,0 +1,359 @@
+<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080d1c">
+    <title>AURIX | Focus. Organize. Achieve.</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+<div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <div class="brand-logo">A</div>
+            <div class="brand-text">
+                <h2>AURIX</h2>
+                <span>PERSONAL WORKSPACE</span>
+            </div>
+        </div>
+
+        <div class="sidebar-label">WORKSPACE</div>
+
+        <nav class="sidebar-nav" aria-label="Main navigation">
+            <button class="nav-link active" data-section="dashboard">◈ <span>Dashboard</span></button>
+            <button class="nav-link" data-section="tasks">☑ <span>To-Do List</span></button>
+            <button class="nav-link" data-section="focus">◷ <span>Focus Center</span></button>
+            <button class="nav-link" data-section="study">▤ <span>Study Hub</span></button>
+            <button class="nav-link" data-section="planner">▦ <span>Daily Planner</span></button>
+            <button class="nav-link" data-section="reminders">🔔 <span>Reminders</span></button>
+            <button class="nav-link" data-section="thoughts">✧ <span>Thoughts & Intention</span></button>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <button class="nav-link" data-section="settings">⚙ <span>Settings</span></button>
+            <div class="sidebar-motto">
+                <span class="motto-indicator"></span>
+                <p>FOCUS. ORGANIZE. ACHIEVE.</p>
+            </div>
+            <div class="sidebar-version">AURIX · VERSION 1.0</div>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button type="button" class="menu-toggle" id="menu-toggle" aria-label="Toggle sidebar">☰</button>
+                <div>
+                    <p class="topbar-eyebrow">YOUR PERSONAL WORKSPACE</p>
+                    <h1 id="page-name">Dashboard</h1>
+                </div>
+            </div>
+
+            <div class="topbar-right">
+                <div class="live-status">
+                    <span class="status-dot"></span>
+                    <span>WORKSPACE ACTIVE</span>
+                </div>
+                <div class="topbar-clock">
+                    <span id="current-date">Loading date...</span>
+                    <strong id="current-time">00:00:00</strong>
+                </div>
+            </div>
+        </header>
+
+        <!-- DASHBOARD -->
+        <section class="page-section active" id="dashboard">
+            <div class="welcome-banner">
+                <div class="welcome-content">
+                    <span class="section-kicker">YOUR DAY STARTS HERE</span>
+                    <h2>Build your day.<br><span>Own your progress.</span></h2>
+                    <p>Stay focused, organize your priorities and make consistent progress every day.</p>
+                    <button class="primary-button" data-go="tasks">View My Tasks →</button>
+                </div>
+                <div class="welcome-visual" aria-hidden="true">
+                    <div class="visual-ring ring-one"></div>
+                    <div class="visual-ring ring-two"></div>
+                    <div class="visual-core">A</div>
+                    <div class="visual-orbit orbit-one"></div>
+                    <div class="visual-orbit orbit-two"></div>
+                </div>
+            </div>
+
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">AT A GLANCE</span>
+                    <h2>Your Overview</h2>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <article class="stat-card">
+                    <div class="stat-top"><span class="stat-label">TASKS COMPLETED</span><span class="stat-icon">✓</span></div>
+                    <strong class="stat-value" id="task-count">0 / 0</strong>
+                    <p class="stat-description">Your task progress</p>
+                </article>
+                <article class="stat-card">
+                    <div class="stat-top"><span class="stat-label">TASK COMPLETION</span><span class="stat-icon">↗</span></div>
+                    <strong class="stat-value" id="goal-percent">0%</strong>
+                    <p class="stat-description">Completed tasks percentage</p>
+                </article>
+                <article class="stat-card">
+                    <div class="stat-top"><span class="stat-label">STUDY CHAPTERS</span><span class="stat-icon">▤</span></div>
+                    <strong class="stat-value" id="dashboard-study-count">0</strong>
+                    <p class="stat-description">Chapters completed</p>
+                </article>
+            </div>
+
+            <div class="dashboard-grid">
+                <article class="panel">
+                    <div class="panel-header">
+                        <div><span class="section-kicker">STAY ORGANIZED</span><h2>Quick Tasks</h2></div>
+                        <button class="text-button" data-go="tasks">View all →</button>
+                    </div>
+                    <form class="task-form" id="task-form">
+                        <input id="task-input" type="text" maxlength="180" placeholder="What needs to get done?" required>
+                        <button type="submit" class="primary-button">+ Add</button>
+                    </form>
+                    <div class="task-list" id="dashboard-task-list"></div>
+                    <p class="empty-state" id="dashboard-empty">No tasks yet. Add your first task above.</p>
+                </article>
+
+                <article class="panel">
+                    <div class="panel-header">
+                        <div><span class="section-kicker">TIME TO CONCENTRATE</span><h2>Quick Focus</h2></div>
+                        <span class="panel-badge">TIMER</span>
+                    </div>
+                    <div class="timer-circle">
+                        <div class="timer-inner">
+                            <span class="timer-caption" id="timer-label">FOCUS SESSION</span>
+                            <strong id="timer-display">25:00</strong>
+                            <span class="timer-status" id="timer-status">Ready when you are</span>
+                        </div>
+                    </div>
+                    <div class="timer-controls">
+                        <button class="primary-button" id="timer-start" type="button">▶ Start Focus</button>
+                        <button class="secondary-button" id="timer-reset" type="button">↺ Reset</button>
+                    </div>
+                    <button class="text-button" data-go="focus">Open Focus Center →</button>
+                </article>
+            </div>
+
+            <article class="panel intention-preview">
+                <div class="intention-symbol">✧</div>
+                <div class="intention-content">
+                    <span class="section-kicker">DAILY INTENTION</span>
+                    <h2 id="dashboard-intention">Small steps. Consistent progress.</h2>
+                    <p>Give your attention to what matters today.</p>
+                </div>
+                <button class="secondary-button" data-go="thoughts">My Intention →</button>
+            </article>
+
+            <article class="panel">
+                <div class="panel-header"><div><span class="section-kicker">COMING UP</span><h2>Upcoming Reminders</h2></div><button class="text-button" data-go="reminders">View all →</button></div>
+                <div id="dashboard-reminders"></div>
+            </article>
+        </section>
+
+        <!-- TO-DO LIST -->
+        <section class="page-section" id="tasks">
+            <div class="page-intro">
+                <span class="section-kicker">PLAN · ACT · COMPLETE</span>
+                <h2>Your Tasks</h2>
+                <p>Turn your priorities into clear, manageable actions.</p>
+            </div>
+            <article class="panel">
+                <div class="panel-header"><div><h2>Task Manager</h2><p class="panel-subtitle">Keep track of what matters.</p></div><span class="panel-badge">TO-DO</span></div>
+                <form class="task-form" id="full-task-form">
+                    <input id="full-task-input" type="text" maxlength="180" placeholder="Enter a new task..." required>
+                    <button type="submit" class="primary-button">+ Add Task</button>
+                </form>
+                <div class="task-list" id="full-task-list"></div>
+                <p class="empty-state" id="full-task-empty">Your task list is clear. Add a task to get started.</p>
+            </article>
+        </section>
+
+        <!-- FOCUS CENTER -->
+        <section class="page-section" id="focus">
+            <div class="page-intro">
+                <span class="section-kicker">PROTECT YOUR ATTENTION</span>
+                <h2>Focus Center</h2>
+                <p>Use a countdown timer or stopwatch for your work sessions.</p>
+            </div>
+
+            <div class="focus-layout">
+                <article class="panel">
+                    <div class="panel-header"><div><span class="section-kicker">COUNTDOWN</span><h2>Focus Timer</h2></div><span class="panel-badge">TIMER</span></div>
+                    <p class="panel-subtitle">Choose a duration and concentrate on one task.</p>
+
+                    <div class="timer-presets" id="timer-presets">
+                        <button class="preset-button" data-minutes="10" type="button">10 min</button>
+                        <button class="preset-button active" data-minutes="25" type="button">25 min</button>
+                        <button class="preset-button" data-minutes="50" type="button">50 min</button>
+                        <button class="preset-button" data-minutes="60" type="button">60 min</button>
+                    </div>
+
+                    <form class="custom-time-form" id="custom-timer-form">
+                        <label for="custom-timer-minutes">Custom minutes</label>
+                        <input id="custom-timer-minutes" type="number" min="1" max="180" placeholder="e.g. 35">
+                        <button class="secondary-button" type="submit">Set Time</button>
+                    </form>
+
+                    <div class="timer-circle large-timer-circle">
+                        <div class="timer-inner">
+                            <span class="timer-caption">TIME REMAINING</span>
+                            <strong id="large-timer-display">25:00</strong>
+                            <span class="timer-status" id="large-timer-status">Ready when you are</span>
+                        </div>
+                    </div>
+
+                    <div class="timer-controls">
+                        <button class="primary-button" id="large-timer-start" type="button">▶ Start Focus</button>
+                        <button class="secondary-button" id="large-timer-reset" type="button">↺ Reset</button>
+                    </div>
+                </article>
+
+                <article class="panel">
+                    <div class="panel-header"><div><span class="section-kicker">ELAPSED TIME</span><h2>Stopwatch</h2></div><span class="panel-badge">STOPWATCH</span></div>
+                    <p class="panel-subtitle">Measure time without setting a countdown.</p>
+                    <div class="stopwatch-display" id="stopwatch-display">00:00:00</div>
+                    <div class="timer-controls">
+                        <button class="primary-button" id="stopwatch-start" type="button">▶ Start</button>
+                        <button class="secondary-button" id="stopwatch-lap" type="button">Lap</button>
+                        <button class="secondary-button" id="stopwatch-reset" type="button">↺ Reset</button>
+                    </div>
+                    <div class="lap-section">
+                        <div class="panel-header"><h3>Lap Records</h3><button class="text-button" id="stopwatch-clear-laps" type="button">Clear</button></div>
+                        <div id="stopwatch-laps"><p class="empty-state">Your lap records will appear here.</p></div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- STUDY HUB -->
+        <section class="page-section" id="study">
+            <div class="page-intro">
+                <span class="section-kicker">LEARN · REVISE · MASTER</span>
+                <h2>Study Hub</h2>
+                <p>Organize your syllabus and keep your study plans in one place.</p>
+            </div>
+
+            <div class="stats-grid">
+                <article class="stat-card"><span class="stat-label">TOTAL CHAPTERS</span><strong class="stat-value" id="study-total-chapters">0</strong></article>
+                <article class="stat-card"><span class="stat-label">COMPLETED</span><strong class="stat-value" id="study-completed-chapters">0</strong></article>
+                <article class="stat-card"><span class="stat-label">SYLLABUS PROGRESS</span><strong class="stat-value" id="study-syllabus-percent">0%</strong></article>
+            </div>
+
+            <article class="panel">
+                <div class="panel-header"><div><span class="section-kicker">SYLLABUS TRACKER</span><h2>Chapter Checklist</h2></div></div>
+                <div class="form-field">
+                    <label for="study-subject">Choose Subject</label>
+                    <select id="study-subject">
+                        <option value="Science">Science</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Social Science">Social Science</option>
+                        <option value="English">English</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="Computer">Computer</option>
+                    </select>
+                </div>
+                <div class="progress-track"><div id="study-subject-progress" class="progress-fill"></div></div>
+                <p id="study-subject-progress-label">0% completed</p>
+                <div id="study-chapter-list"></div>
+                <p id="study-chapter-empty" class="empty-state">Select a subject to see its chapters.</p>
+            </article>
+
+            <article class="panel">
+                <div class="panel-header"><div><span class="section-kicker">PLAN YOUR STUDY</span><h2>Study Planner</h2></div></div>
+                <form id="study-plan-form" class="task-form">
+                    <input type="date" id="study-plan-date" required>
+                    <select id="study-plan-subject" required>
+                        <option value="">Choose subject</option>
+                        <option>Science</option><option>Mathematics</option><option>Social Science</option>
+                        <option>English</option><option>Hindi</option><option>Computer</option>
+                    </select>
+                    <input id="study-plan-task" type="text" placeholder="What will you study?" required>
+                    <button class="primary-button" type="submit">Add Plan</button>
+                </form>
+                <div id="study-plan-list"></div>
+                <p id="study-plan-empty" class="empty-state">No study plans yet.</p>
+            </article>
+        </section>
+
+        <!-- DAILY PLANNER -->
+        <section class="page-section" id="planner">
+            <div class="page-intro">
+                <span class="section-kicker">DESIGN YOUR DAY</span>
+                <h2>Daily Planner</h2>
+                <p>Give every important task a place in your day.</p>
+            </div>
+
+            <article class="panel">
+                <div class="panel-header"><div><h2>Create a Plan</h2><p class="panel-subtitle">Add an activity with a date and time.</p></div><span class="panel-badge">PLANNER</span></div>
+
+                <form id="planner-form" class="task-form">
+                    <input id="planner-title" type="text" maxlength="180" placeholder="Activity or task name" required>
+                    <input id="planner-date" type="date" required>
+                    <input id="planner-time" type="time" required>
+                    <button class="primary-button" type="submit">+ Add Plan</button>
+                </form>
+
+                <div class="section-heading"><h2>My Daily Schedule</h2></div>
+                <div id="planner-list"></div>
+                <p id="planner-empty" class="empty-state">Your schedule is empty. Add your first plan above.</p>
+            </article>
+        </section>
+
+        <!-- REMINDERS -->
+        <section class="page-section" id="reminders">
+            <div class="page-intro">
+                <span class="section-kicker">REMEMBER WHAT MATTERS</span>
+                <h2>Reminders & Alarm</h2>
+                <p>Set a time, then let AURIX alert you with a sound while the page is open.</p>
+            </div>
+
+            <article class="panel">
+                <div class="panel-header"><div><h2>Create Reminder</h2><p class="panel-subtitle">Choose when you want to be reminded.</p></div><span class="panel-badge">ALARM</span></div>
+
+                <form id="reminder-form" class="task-form">
+                    <input id="reminder-title" type="text" maxlength="160" placeholder="Reminder name" required>
+                    <input id="reminder-date" type="date" required>
+                    <input id="reminder-time" type="time" required>
+                    <button class="primary-button" type="submit">🔔 Set Reminder</button>
+                </form>
+
+                <div class="form-field">
+                    <label for="reminder-tone">Alarm tune</label>
+                    <select id="reminder-tone">
+                        <option value="classic">Classic Chime</option>
+                        <option value="gentle">Gentle Bells</option>
+                        <option value="digital">Digital Beeps</option>
+                    </select>
+                </div>
+
+                <button class="secondary-button" id="test-alarm" type="button">▶ Test Alarm Sound</button>
+                <p class="panel-subtitle">Keep this page open and allow sound. Your browser may restrict alarms if the page is closed or the device sleeps.</p>
+
+                <div class="section-heading"><h2>My Reminders</h2></div>
+                <div id="reminder-list"></div>
+                <p id="reminder-empty" class="empty-state">No reminders yet. Create one above.</p>
+            </article>
+        </section>
+
+        <!-- THOUGHTS & INTENTION -->
+        <section class="page-section" id="thoughts">
+            <div class="page-intro">
+                <span class="section-kicker">REFLECT · RESET · BEGIN</span>
+                <h2>Thoughts & Intention</h2>
+                <p>Write down what matters and choose your direction for today.</p>
+            </div>
+
+            <article class="panel">
+                <div class="panel-header"><div><h2>My Daily Intention</h2><p class="panel-subtitle">What is the one thing you want to focus on today?</p></div></div>
+                <form id="intention-form">
+                    <textarea id="intention-input" rows="3" maxlength="500" placeholder="Today, I will focus on..."></textarea>
