@@ -729,7 +729,7 @@ if ($("#planner-date")) $("#planner-date").value = todayString();
 renderPlanner();
 
 /* =========================================
-   REMINDERS
+   REMINDERS — AURIX
 ========================================= */
 
 let reminders = load(STORAGE.reminders, []);
@@ -765,10 +765,12 @@ function renderReminders() {
     const dashboard = $("#dashboard-reminders");
 
     if (dashboard) {
-        const upcoming = sorted.filter((item) => !item.fired).slice(0, 3);
+        const upcoming = sorted
+            .filter(item => !item.fired)
+            .slice(0, 3);
 
         dashboard.innerHTML = upcoming.length
-            ? upcoming.map((item) => `
+            ? upcoming.map(item => `
                 <div class="task-item">
                     <span>🔔 ${escapeHTML(item.title)}</span>
                     <small>${escapeHTML(item.when.replace("T", " "))}</small>
@@ -778,20 +780,24 @@ function renderReminders() {
     }
 }
 
-$("#reminder-form")?.addEventListener("submit", (event) => {
+/* ADD REMINDER */
+
+$("#reminder-form")?.addEventListener("submit", event => {
     event.preventDefault();
 
-    const title = $("#reminder-title").value.trim();
-    const date = $("#reminder-date").value;
-    const time = $("#reminder-time").value
-    ;
+    const title = $("#reminder-title")?.value.trim();
+    const date = $("#reminder-date")?.value;
+    const time = $("#reminder-time")?.value;
 
-    if (!title || !date || !time) return;
+    if (!title || !date || !time) {
+        alert("Please enter the reminder title, date and time.");
+        return;
+    }
 
     const when = `${date}T${time}`;
 
     if (new Date(when).getTime() <= Date.now()) {
-        window.alert("Please select a future date and time.");
+        alert("Please select a future date and time.");
         return;
     }
 
@@ -804,58 +810,85 @@ $("#reminder-form")?.addEventListener("submit", (event) => {
     });
 
     save(STORAGE.reminders, reminders);
+
     $("#reminder-form").reset();
-    $("#reminder-date").value = todayString();
+
+    if ($("#reminder-date")) {
+        $("#reminder-date").value = todayString();
+    }
+
     renderReminders();
 });
 
-if ($("#reminder-date")) $("#reminder-date").value = todayString();
+/* SET DEFAULT DATE */
+
+if ($("#reminder-date")) {
+    $("#reminder-date").value = todayString();
+}
+
+/* DELETE REMINDER */
+
+$("#reminder-list")?.addEventListener("click", event => {
+    const button = event.target.closest("[data-reminder-delete]");
+
+    if (!button) return;
+
+    const id = button.dataset.reminderDelete;
+
+    if (ringingReminder?.id === id) {
+        stopAlarmSound();
+
+        if ($("#alarm-overlay")) {
+            $("#alarm-overlay").hidden = true;
+        }
+
+        ringingReminder = null;
+        activeAlarmId = null;
+    }
+
+    reminders = reminders.filter(item => item.id !== id);
+
+    save(STORAGE.reminders, reminders);
+    renderReminders();
+});
+
+/* TRIGGER ALARM */
+
 function triggerReminder(reminder) {
     if (ringingReminder) return;
-    function stopAlarmSound() {
-    if (alarmAudioInterval) clearInterval(alarmAudioInterval);
-
-    alarmAudioInterval = null;
-
-    if (audioContext?.state === "running") {
-        // Keep audio context available for the next user-initiated sound.
-    }
-}
-
-function startAlarmSound() {
-    stopAlarmSound();
-    playAlarmTone();
-
-    alarmAudioInterval = setInterval(playAlarmTone, 1800);
-}
 
     ringingReminder = reminder;
     activeAlarmId = reminder.id;
 
     const overlay = $("#alarm-overlay");
+
     if (overlay) overlay.hidden = false;
 
     showMessage($("#alarm-title"), "It's time!");
     showMessage($("#alarm-message"), reminder.title);
 
+    // Uses the main Audio Engine functions already in script.js.
     startAlarmSound();
 
-    if ("Notification" in window && Notification.permission === "granted") {
+    if ("Notification" in window &&
+        Notification.permission === "granted") {
         try {
             new Notification("AURIX Reminder", {
                 body: reminder.title
             });
         } catch (error) {
-            console.warn("Desktop notification unavailable.", error);
+            console.warn("Notification unavailable.", error);
         }
     }
 }
+
+/* STOP CURRENT ALARM */
 
 $("#alarm-stop")?.addEventListener("click", () => {
     stopAlarmSound();
 
     if (activeAlarmId) {
-        reminders = reminders.map((item) =>
+        reminders = reminders.map(item =>
             item.id === activeAlarmId
                 ? { ...item, fired: true, snoozedUntil: null }
                 : item
@@ -864,17 +897,23 @@ $("#alarm-stop")?.addEventListener("click", () => {
         save(STORAGE.reminders, reminders);
     }
 
-    $("#alarm-overlay").hidden = true;
+    if ($("#alarm-overlay")) {
+        $("#alarm-overlay").hidden = true;
+    }
+
     ringingReminder = null;
     activeAlarmId = null;
+
     renderReminders();
 });
+
+/* SNOOZE FOR 5 MINUTES */
 
 $("#alarm-snooze")?.addEventListener("click", () => {
     stopAlarmSound();
 
     if (activeAlarmId) {
-        reminders = reminders.map((item) =>
+        reminders = reminders.map(item =>
             item.id === activeAlarmId
                 ? {
                     ...item,
@@ -887,18 +926,24 @@ $("#alarm-snooze")?.addEventListener("click", () => {
         save(STORAGE.reminders, reminders);
     }
 
-    $("#alarm-overlay").hidden = true;
+    if ($("#alarm-overlay")) {
+        $("#alarm-overlay").hidden = true;
+    }
+
     ringingReminder = null;
     activeAlarmId = null;
+
     renderReminders();
 });
+
+/* CHECK DUE REMINDERS */
 
 function checkReminders() {
     if (ringingReminder) return;
 
     const now = Date.now();
 
-    const due = reminders.find((reminder) => {
+    const due = reminders.find(reminder => {
         if (reminder.fired) return false;
 
         if (reminder.snoozedUntil) {
@@ -908,11 +953,26 @@ function checkReminders() {
         return new Date(reminder.when).getTime() <= now;
     });
 
-    if (due) triggerReminder(due);
+    if (due) {
+        triggerReminder(due);
+    }
 }
 
-setInterval(checkReminders, 1000);
+/* TEST SOUND BUTTONS */
+
+$("#test-alarm")?.addEventListener("click", () => {
+    stopAlarmSound();
+    playAlarmTone();
+});
+
+$("#test-alarm-stop")?.addEventListener("click", () => {
+    stopAlarmSound();
+});
+
+/* START REMINDER SYSTEM */
+
 renderReminders();
+setInterval(checkReminders, 1000);
 
 /* =========================================
    STUDY HUB
