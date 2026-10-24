@@ -507,24 +507,29 @@ $("#stopwatch-clear-laps")?.addEventListener("click", () => {
 
 renderStopwatch();
 
+
 /* =========================================
-   AUDIO ENGINE
+   AUDIO ENGINE — FIXED STOP CONTROL
 ========================================= */
 
 let audioContext = null;
 let alarmAudioInterval = null;
+let pendingAudioTimeouts = [];
+let activeOscillators = new Set();
 let activeAlarmId = null;
 
 function getAudioContext() {
-    const AudioContextClass = window.AudioContext ||
-        window.webkitAudioContext;
+    const AudioContextClass =
+        window.AudioContext || window.webkitAudioContext;
 
     if (!AudioContextClass) {
-        window.alert("This browser does not support the alarm sound feature.");
+        window.alert("This browser does not support alarm sounds.");
         return null;
     }
 
-    if (!audioContext) audioContext = new AudioContextClass();
+    if (!audioContext) {
+        audioContext = new AudioContextClass();
+    }
 
     if (audioContext.state === "suspended") {
         audioContext.resume().catch(() => {});
@@ -533,57 +538,120 @@ function getAudioContext() {
     return audioContext;
 }
 
+function scheduleAlarmNote(
+    frequency,
+    delay,
+    duration,
+    volume = 0.12
+) {
+    const timeout = setTimeout(() => {
+        pendingAudioTimeouts =
+            pendingAudioTimeouts.filter((id) => id !== timeout);
+
+        const context = getAudioContext();
+        if (!context) return;
+
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+
+        activeOscillators.add(oscillator);
+
+        oscillator.type = "sine";
+        oscillator.frequency.value = frequency;
+
+        gain.gain.setValueAtTime(0.001, context.currentTime);
+        gain.gain.exponentialRampToValueAtTime(
+            volume,
+            context.currentTime + 0.03
+        );
+        gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            context.currentTime + duration
+        );
+
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+
+        oscillator.onended = () => {
+            activeOscillators.delete(oscillator);
+            oscillator.disconnect();
+            gain.disconnect();
+        };
+
+        oscillator.start();
+        oscillator.stop(context.currentTime + duration + 0.04);
+    }, delay);
+
+    pendingAudioTimeouts.push(timeout);
+}
+
 function playNote(frequency, duration = 0.35, volume = 0.12) {
-    const context = getAudioContext();
-    if (!context) return;
-
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-
-    oscillator.type = "sine";
-    oscillator.frequency.value = frequency;
-
-    gain.gain.setValueAtTime(0.001, context.currentTime);
-    gain.gain.exponentialRampToValueAtTime(
-        volume,
-        context.currentTime + 0.03
-    );
-    gain.gain.exponentialRampToValueAtTime(
-        0.001,
-        context.currentTime + duration
-    );
-
-    oscillator.connect(gain);
-    gain.connect(context.destination);
-
-    oscillator.start();
-    oscillator.stop(context.currentTime + duration + 0.03);
+    scheduleAlarmNote(frequency, 0, duration, volume);
 }
 
 function playAlarmTone() {
-    const tone = $("#reminder-tone")?.value ||
-        load(STORAGE.settings, {}).tone ||
-        "classic";
+    const context = getAudioContext();
+    if (!context) return;
+
+    const tone = $("#reminder-tone")?.value || "classic";
 
     if (tone === "gentle") {
         playNote(659, 0.45);
-        setTimeout(() => playNote(784, 0.5), 250);
-        setTimeout(() => playNote(988, 0.6), 550);
+        scheduleAlarmNote(784, 250, 0.5);
+        scheduleAlarmNote(988, 550, 0.6);
     } else if (tone === "digital") {
         playNote(880, 0.2);
-        setTimeout(() => playNote(880, 0.2), 300);
-        setTimeout(() => playNote(1100, 0.25), 600);
+        scheduleAlarmNote(880, 300, 0.2);
+        scheduleAlarmNote(1100, 600, 0.25);
     } else {
         playNote(523, 0.35);
-        setTimeout(() => playNote(659, 0.4), 220);
-        setTimeout(() => playNote(784, 0.6), 470);
+        scheduleAlarmNote(659, 220, 0.4);
+        scheduleAlarmNote(784, 470, 0.6);
     }
 }
 
+function stopAlarmSound() {
+    if (alarmAudioInterval !== null) {
+        clearInterval(alarmAudioInterval);
+        alarmAudioInterval = null;
+    }
+
+    pendingAudioTimeouts.forEach((timeout) => {
+        clearTimeout(timeout);
+    });
+    pendingAudioTimeouts = [];
+
+    activeOscillators.forEach((oscillator) => {
+        try {
+            oscillator.stop();
+            oscillator.disconnect();
+        } catch (error) {
+            // The oscillator may already have stopped.
+        }
+    });
+
+    activeOscillators.clear();
+}
+
+function startAlarmSound() {
+    stopAlarmSound();
+
+    playAlarmTone();
+
+    alarmAudioInterval = setInterval(() => {
+        playAlarmTone();
+    }, 1800);
+}
+
 $("#test-alarm")?.addEventListener("click", () => {
-    getAudioContext();
+    stopAlarmSound();
     playAlarmTone();
 });
+
+$("#test-alarm-stop")?.addEventListener(
+    "click",
+    stopAlarmSound
+);
 
 /* =========================================
    DAILY PLANNER
@@ -742,8 +810,9 @@ $("#reminder-form")?.addEventListener("submit", (event) => {
 });
 
 if ($("#reminder-date")) $("#reminder-date").value = todayString();
-
-function stopAlarmSound() {
+function triggerReminder(reminder) {
+    if (ringingReminder) return;
+    function stopAlarmSound() {
     if (alarmAudioInterval) clearInterval(alarmAudioInterval);
 
     alarmAudioInterval = null;
@@ -759,9 +828,6 @@ function startAlarmSound() {
 
     alarmAudioInterval = setInterval(playAlarmTone, 1800);
 }
-
-function triggerReminder(reminder) {
-    if (ringingReminder) return;
 
     ringingReminder = reminder;
     activeAlarmId = reminder.id;
